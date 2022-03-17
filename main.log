@@ -129,12 +129,12 @@ Notes:
 . 
 . log using "$logdir/logfile_`cdate'-`ctime'-`c(username)'.log", name(ldi) repl
 > ace text
-(file /project/logs/logfile_17_Mar_2022-18_56_05-statauser.log not found)
+(file /project/logs/logfile_17_Mar_2022-19_03_11-statauser.log not found)
 -------------------------------------------------------------------------------
       name:  ldi
-       log:  /project/logs/logfile_17_Mar_2022-18_56_05-statauser.log
+       log:  /project/logs/logfile_17_Mar_2022-19_03_11-statauser.log
   log type:  text
- opened on:  17 Mar 2022, 18:56:05
+ opened on:  17 Mar 2022, 19:03:11
 
 . 
 . /* It will provide some info about how and when the program was run */
