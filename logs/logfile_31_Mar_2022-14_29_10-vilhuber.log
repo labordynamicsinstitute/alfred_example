@@ -1,0 +1,239 @@
+----------------------------------------------------------------------------------------------------------------------------
+      name:  ldi
+       log:  /mnt/local/raid5_1/vilhuber/Workspace-non-encrypted/git/LDI/alfred_example/logs/logfile_31_Mar_2022-14_29_10-vi
+> lhuber.log
+  log type:  text
+ opened on:  31 Mar 2022, 14:29:10
+
+. 
+. /* It will provide some info about how and when the program was run */
+. /* See https://www.stata.com/manuals13/pcreturn.pdf#pcreturn */
+. local variant = cond(c(MP),"MP",cond(c(SE),"SE",c(flavor)) )  
+
+. // alternatively, you could use 
+. // local variant = cond(c(stata_version)>13,c(real_flavor),"NA")  
+. 
+. di "=== SYSTEM DIAGNOSTICS ==="
+=== SYSTEM DIAGNOSTICS ===
+
+. di "Stata version: `c(stata_version)'"
+Stata version: 17
+
+. di "Updated as of: `c(born_date)'"
+Updated as of: 15 Feb 2022
+
+. di "Variant:       `variant'"
+Variant:       IC
+
+. di "Processors:    `c(processors)'"
+Processors:    1
+
+. di "OS:            `c(os)' `c(osdtl)'"
+OS:            Unix 
+
+. di "Machine type:  `c(machine_type)'"
+Machine type:  PC (64-bit x86-64)
+
+. di "=========================="
+==========================
+
+. 
+. 
+. /* install any packages locally */
+. capture mkdir "$rootdir/ado"
+
+. sysdir set PERSONAL "$rootdir/ado/personal"
+
+. sysdir set PLUS     "$rootdir/ado/plus"
+
+. sysdir set SITE     "$rootdir/ado/site"
+
+. sysdir
+   STATA:  /usr/local/stata17/
+    BASE:  /usr/local/stata17/ado/base/
+    SITE:  /mnt/local/raid5_1/vilhuber/Workspace-non-encrypted/git/LDI/alfred_example/ado/site/
+    PLUS:  /mnt/local/raid5_1/vilhuber/Workspace-non-encrypted/git/LDI/alfred_example/ado/plus/
+PERSONAL:  /mnt/local/raid5_1/vilhuber/Workspace-non-encrypted/git/LDI/alfred_example/ado/personal/
+OLDPLACE:  ~/ado/
+
+. 
+. /* add packages to the macro */
+. 
+.     
+.     if !missing("`ssc_packages'") {
+.         foreach pkg in `ssc_packages' {
+  2.             capture which `pkg'
+  3.             if _rc == 111 {                 
+  4.                dis "Installing `pkg'"
+  5.                 ssc install `pkg', replace
+  6.             }
+  7.             which `pkg'
+  8.         }
+/mnt/local/raid5_1/vilhuber/Workspace-non-encrypted/git/LDI/alfred_example/ado/plus/s/statastates.ado
+.     }
+
+. 
+. /*==============================================================================================*/
+. /* If you need to "net install" packages, add lines to this section                             */
+.     * Install packages using net
+.     *  net install yaml, from("https://raw.githubusercontent.com/gslab-econ/stata-misc/master/")
+.     
+. /* other commands, rarely used */
+. 
+. /*==============================================================================================*/
+. /* after installing all packages, it may be necessary to issue the mata mlib index command */
+. /* This should always be the LAST command after installing all packages                    */
+. 
+.         mata: mata mlib index
+.mlib libraries to be searched are now
+    lmatabase;lmatami;lmatamcmc;lmatanumlib;lmatasvy;lmatalasso;lmatabma;lmatamixlog;lmataado;lmatapath;lmatacollect;lmatame
+> ta;lmataerm;lmatasp;lmataopt;lmatafc;lmatatab;lmatagsem;lmatapss;lmatapostest;lmatasem
+
+. 
+. 
+. 
+. 
+. set fredkey $FREDKEY
+
+. 
+. /* set some parameters we want to re-use */
+. /* - the daterange we want               */
+. global DATERANGE "daterange(2007-01-01 2007-01-01)"
+
+. /* - the as-of date we want              */
+. local c_date = c(current_date)
+
+. global VINTAGE "2021-12-31"
+
+. global gdptag "NQGSP"
+
+. 
+. 
+. 
+. 
+. /* LESSON: 
+>    - always use a fixed date to query the API.
+>    - some series change as time progresses, even for historical values.
+> */
+. 
+. /* SUPPLEMENTARY LESSON */
+. /* Save the data pulled through the API as an intermediate dataset */
+. /* and if permissible by the license (check!), redistribute it     */
+. /* in case that the API is deprecated and won't work in the future */
+. 
+. cap mkdir data
+
+. cap mkdir data/fred
+
+. global gdpdata "data/fred/fred_qgdp.dta"
+
+. 
+. /* generate the state names */
+. /* requires "statastates" */
+. /* run once to generate the dataset */
+. 
+. statastates
+
+. 
+. /* now read in the dataset */
+. use "`c(sysdir_personal)'statastates_data/statastates.dta"
+
+. local N=_N 
+
+. global gdpseries 
+
+. forvalues row=1 (1) `N'{
+  2.    local state = state_abbrev[`row']
+  3.    global gdpseries $gdpseries `state'$gdptag
+  4. }
+
+. 
+. capture confirm file "$gdpdata"
+
+. if _rc == 0 {
+.     di "Re-using existing file"
+.     use  "$gdpdata" , clear
+. }
+
+. else { 
+.     /* code if the file does not exist */
+.     /* you could do the full API pull  */
+.     /* conditional on the intermediate */
+.     /* file NOT being there.           */
+.     di "Reading in data from FRED API with vintage=$VINTAGE"
+Reading in data from FRED API with vintage=2021-12-31
+.     clear
+.     import fred $gdpseries, $DATERANGE vintage($VINTAGE)
+Too many requests reported by FRED server; please wait................
+Too many requests reported by FRED server; please wait................
+Too many requests reported by FRED server; please wait................
+
+Summary
+----------------------------------------------------------------------------------------------------------------------------
+Series ID                    Nobs    Date range                Frequency
+----------------------------------------------------------------------------------------------------------------------------
+AKNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+ALNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+ARNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+AZNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+CANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+CONQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+CTNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+DCNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+DENQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+FLNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+GANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+HINQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+IANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+IDNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+ILNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+INNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+KSNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+KYNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+LANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MDNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MENQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MINQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MNNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MONQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MSNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+MTNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NCNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NDNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NENQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NHNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NJNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NMNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NVNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+NYNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+OHNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+OKNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+ORNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+PANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+RINQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+SCNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+SDNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+TNNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+TXNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+UTNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+VANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+VTNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+WANQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+WINQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+WVNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+WYNQGSP_20211231             1       2007-01-01 to 2007-01-01  Quarterly
+----------------------------------------------------------------------------------------------------------------------------
+# of series imported: 51
+   highest frequency: Quarterly
+    lowest frequency: Quarterly
+.     save "$gdpdata"
+file data/fred/fred_qgdp.dta saved
+.     use  "$gdpdata" , clear
+. } 
+
+. 
+end of do-file
+
+
+. exit, clear

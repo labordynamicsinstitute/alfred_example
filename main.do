@@ -11,60 +11,10 @@ global DATERANGE "daterange(2007-01-01 2007-01-01)"
 /* - the as-of date we want              */
 local c_date = c(current_date)
 global VINTAGE "2021-12-31"
-/* - for testing, other as-of dates      */
-global ALTVINTAGES "2008-09-15 2015-09-15"
+global gdptag "NQGSP"
 
 
-/* now go ahead and import the data, by default (lazy path) */
 
-import fred GNPCA, $DATERANGE
-li
-qui sum GNPCA
-local default=r(mean)
-
-/* now do the same thing, but precisely defining the vintages */
-
-clear
-import fred GNPCA, $DATERANGE vintage($VINTAGE)
-li
-qui sum GNPCA*
-local vintaged=r(mean)
-
-di "As of `c_date', the two values are:"
-di " - `default' when not specifying a vintage"
-di " - `vintaged' when specifying vintage $VINTAGE"
-
-/* Expected result :
-   -------------------------------
-. di "As of `c_date', the two values are:"
-As of 17 Mar 2022, the two values are:
-
-. di " - `default' when not specifying a vintage"
- - 15727.50390625 when not specifying a vintage
-
-. di " - `vintaged' when specifying vintage $VINTAGE"
- - 15727.50390625 when specifying vintage 2021-12-31b
-  -------------------------------
-*/
-
-/* now let's see why this matters - let's pull down a few more vintages */
-
-
-clear
-import fred GNPCA, $DATERANGE vintage($VINTAGE $ALTVINTAGES)
-li GNPCA*
-
-/* Expected result as of 2022-03-17: */
-/* ------------------------------------
-
-     +--------------------------------+
-     | GN~80915   GN~50915   GNPCA_~1 |
-     |--------------------------------|
-  1. |  11609.8    15005.7    15727.5 |
-     +--------------------------------+
-
-NOTE: this should *never* change .
-*/
 
 /* LESSON: 
    - always use a fixed date to query the API.
@@ -78,11 +28,27 @@ NOTE: this should *never* change .
 
 cap mkdir data
 cap mkdir data/fred
+global gdpdata "data/fred/fred_qgdp.dta"
 
-capture confirm file "data/fred/fred_gnpca.dta"
+/* generate the state names */
+/* requires "statastates" */
+/* run once to generate the dataset */
+
+statastates
+
+/* now read in the dataset */
+use "`c(sysdir_personal)'statastates_data/statastates.dta"
+local N=_N 
+global gdpseries 
+forvalues row=1 (1) `N'{
+   local state = state_abbrev[`row']
+   global gdpseries $gdpseries `state'$gdptag
+}
+
+capture confirm file "$gdpdata"
 if _rc == 0 {
     di "Re-using existing file"
-    use  "data/fred/fred_gnpca.dta" , clear
+    use  "$gdpdata" , clear
 }
 else { 
     /* code if the file does not exist */
@@ -91,7 +57,7 @@ else {
     /* file NOT being there.           */
     di "Reading in data from FRED API with vintage=$VINTAGE"
     clear
-    import fred GNPCA, $DATERANGE vintage($VINTAGE)
-    save "data/fred/fred_gnpca.dta"
-    use  "data/fred/fred_gnpca.dta" , clear
+    import fred $gdpseries, $DATERANGE vintage($VINTAGE)
+    save "$gdpdata"
+    use  "$gdpdata" , clear
 } 
