@@ -1,3 +1,3 @@
 /* FRED apikey - keep this file private */
 
-global FREDKEY "c3e82f9802d7aea5da3c2b275833ac31"
+global FREDKEY "78862231cc0bd7a7f3b84eb9e19d4b7e"
