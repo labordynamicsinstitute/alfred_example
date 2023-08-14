@@ -127,10 +127,11 @@ Researchers should therefore preserve a version of the data on the first pull fr
 Without necessarily over-engineering for the third point, a simple way to implement this is to store a local file with the information pulled down, and check for its presence before accessing the API:
 
 ```{stata}
-
+cap mkdir "data"
+cap mkdir "data/fred"
 capture confirm file "data/fred/fred_gnpca.dta"
 if _rc == 0 {
-    di "Re-using existing file"
+    noi di in red "Re-using existing file"
     use  "data/fred/fred_gnpca.dta" , clear
 }
 else { 
@@ -138,7 +139,7 @@ else {
     /* you could do the full API pull  */
     /* conditional on the intermediate */
     /* file NOT being there.           */
-    di "Reading in data from FRED API with vintage=$VINTAGE"
+    noi di "Reading in data from FRED API with vintage=$VINTAGE"
     clear
     import fred GNPCA, $DATERANGE vintage($VINTAGE)
     save "data/fred/fred_gnpca.dta"

@@ -76,12 +76,12 @@ NOTE: this should *never* change .
 /* and if permissible by the license (check!), redistribute it     */
 /* in case that the API is deprecated and won't work in the future */
 
-cap mkdir data
-cap mkdir data/fred
+cap mkdir "data"
+cap mkdir "data/fred"
 
 capture confirm file "data/fred/fred_gnpca.dta"
 if _rc == 0 {
-    di "Re-using existing file"
+    noi di "Re-using existing file"
     use  "data/fred/fred_gnpca.dta" , clear
 }
 else { 
@@ -89,7 +89,7 @@ else {
     /* you could do the full API pull  */
     /* conditional on the intermediate */
     /* file NOT being there.           */
-    di "Reading in data from FRED API with vintage=$VINTAGE"
+    noi di "Reading in data from FRED API with vintage=$VINTAGE"
     clear
     import fred GNPCA, $DATERANGE vintage($VINTAGE)
     save "data/fred/fred_gnpca.dta"
