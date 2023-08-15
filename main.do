@@ -13,6 +13,7 @@ local c_date = c(current_date)
 global VINTAGE "2021-12-31"
 /* - for testing, other as-of dates      */
 global ALTVINTAGES "2008-09-15 2015-09-15"
+global NOTE "README ::::"
 
 
 /* now go ahead and import the data, by default (lazy path) */
@@ -81,7 +82,7 @@ cap mkdir "data/fred"
 
 capture confirm file "data/fred/fred_gnpca.dta"
 if _rc == 0 {
-    noi di "Re-using existing file"
+    noi di "$NOTE Re-using existing file"
     use  "data/fred/fred_gnpca.dta" , clear
 }
 else { 
@@ -89,7 +90,7 @@ else {
     /* you could do the full API pull  */
     /* conditional on the intermediate */
     /* file NOT being there.           */
-    noi di "Reading in data from FRED API with vintage=$VINTAGE"
+    noi di "$NOTE Reading in data from FRED API with vintage=$VINTAGE"
     clear
     import fred GNPCA, $DATERANGE vintage($VINTAGE)
     save "data/fred/fred_gnpca.dta"

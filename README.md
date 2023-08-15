@@ -139,7 +139,7 @@ else {
     /* you could do the full API pull  */
     /* conditional on the intermediate */
     /* file NOT being there.           */
-    noi di "Reading in data from FRED API with vintage=$VINTAGE"
+    noi di "$NOTE Reading in data from FRED API with vintage=$VINTAGE"
     clear
     import fred GNPCA, $DATERANGE vintage($VINTAGE)
     save "data/fred/fred_gnpca.dta"

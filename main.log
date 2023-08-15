@@ -1,7 +1,7 @@
 
   ___  ____  ____  ____  ____ ®
  /__    /   ____/   /   ____/      17.0
-___/   /   /___/   /   /___/       MP—Parallel Edition
+___/   /   /___/   /   /___/       BE—Basic Edition
 
  Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
                                    StataCorp
@@ -10,7 +10,7 @@ ___/   /   /___/   /   /___/       MP—Parallel Edition
                                    800-STATA-PC        https://www.stata.com
                                    979-696-4600        stata@stata.com
 
-Stata license: 2-user 32-core network, expiring 27 Apr 2022
+Stata license: 2-user network, expiring 27 Apr 2024
 Serial number: 501709300062
   Licensed to: Lars Vilhuber (Data Editor)
                American Economic Association
@@ -18,8 +18,6 @@ Serial number: 501709300062
 Notes:
       1. Stata is running in batch mode.
       2. Unicode is supported; see help unicode_advice.
-      3. More than 2 billion observations are allowed; see help obs_advice.
-      4. Maximum number of variables is set to 5,000; see help set_maxvar.
 
 . do main.do 
 
@@ -108,7 +106,7 @@ Notes:
 
 . cd `pwd'                            // Return to where we were before and nev
 > er again use cd
-/project
+/workspaces/alfred_example
 
 . global logdir "${rootdir}/logs"
 
@@ -129,12 +127,15 @@ Notes:
 . 
 . log using "$logdir/logfile_`cdate'-`ctime'-`c(username)'.log", name(ldi) repl
 > ace text
-(file /project/logs/logfile_17_Mar_2022-19_03_11-statauser.log not found)
+(file
+    /workspaces/alfred_example/logs/logfile_14_Aug_2023-19_46_40-rstudio.log
+    not found)
 -------------------------------------------------------------------------------
       name:  ldi
-       log:  /project/logs/logfile_17_Mar_2022-19_03_11-statauser.log
+       log:  /workspaces/alfred_example/logs/logfile_14_Aug_2023-19_46_40-rstud
+> io.log
   log type:  text
- opened on:  17 Mar 2022, 19:03:11
+ opened on:  14 Aug 2023, 19:46:40
 
 . 
 . /* It will provide some info about how and when the program was run */
@@ -151,13 +152,13 @@ Notes:
 Stata version: 17
 
 . di "Updated as of: `c(born_date)'"
-Updated as of: 13 Dec 2021
+Updated as of: 10 Jan 2023
 
 . di "Variant:       `variant'"
-Variant:       MP
+Variant:       IC
 
 . di "Processors:    `c(processors)'"
-Processors:    24
+Processors:    1
 
 . di "OS:            `c(os)' `c(osdtl)'"
 OS:            Unix 
@@ -182,9 +183,9 @@ Machine type:  PC (64-bit x86-64)
 . sysdir
    STATA:  /usr/local/stata/
     BASE:  /usr/local/stata/ado/base/
-    SITE:  /project/ado/site/
-    PLUS:  /project/ado/plus/
-PERSONAL:  /project/ado/personal/
+    SITE:  /workspaces/alfred_example/ado/site/
+    PLUS:  /workspaces/alfred_example/ado/plus/
+PERSONAL:  /workspaces/alfred_example/ado/personal/
 OLDPLACE:  ~/ado/
 
 . 
@@ -222,9 +223,9 @@ OLDPLACE:  ~/ado/
 . 
 .         mata: mata mlib index
 .mlib libraries to be searched are now
-    lmatabase;lmataopt;lmatamcmc;lmataado;lmatasvy;lmatamixlog;lmatasp;lmatamet
-> a;lmatapath;lmatafc;lmatalasso;lmatanumlib;lmatatab;lmatasem;lmatacollect;lma
-> taerm;lmatapostest;lmatami;lmatapss;lmatagsem;lmatabma
+    lmatabase;lmatameta;lmatasp;lmataerm;lmatapath;lmatacollect;lmatapss;lmatag
+> sem;lmatafc;lmatasem;lmatamixlog;lmatapostest;lmatamcmc;lmatami;lmataado;lmat
+> atab;lmatasvy;lmatabma;lmatalasso;lmataopt;lmatanumlib
 
 . 
 . 
@@ -244,6 +245,8 @@ OLDPLACE:  ~/ado/
 
 . /* - for testing, other as-of dates      */
 . global ALTVINTAGES "2008-09-15 2015-09-15"
+
+. global NOTE "README ::::"
 
 . 
 . 
@@ -304,7 +307,7 @@ GNPCA_20211231               1       2007-01-01 to 2007-01-01  Annual
 
 . 
 . di "As of `c_date', the two values are:"
-As of 17 Mar 2022, the two values are:
+As of 14 Aug 2023, the two values are:
 
 . di " - `default' when not specifying a vintage"
  - 15727.50390625 when not specifying a vintage
@@ -376,15 +379,16 @@ GNPCA_20211231               1       2007-01-01 to 2007-01-01  Annual
 . /* and if permissible by the license (check!), redistribute it     */
 . /* in case that the API is deprecated and won't work in the future */
 . 
-. cap mkdir data
+. cap mkdir "data"
 
-. cap mkdir data/fred
+. cap mkdir "data/fred"
 
 . 
 . capture confirm file "data/fred/fred_gnpca.dta"
 
 . if _rc == 0 {
-.     di "Re-using existing file"
+.     noi di "$NOTE Re-using existing file"
+README :::: Re-using existing file
 .     use  "data/fred/fred_gnpca.dta" , clear
 . }
 
@@ -393,22 +397,10 @@ GNPCA_20211231               1       2007-01-01 to 2007-01-01  Annual
 .     /* you could do the full API pull  */
 .     /* conditional on the intermediate */
 .     /* file NOT being there.           */
-.     di "Reading in data from FRED API with vintage=$VINTAGE"
-Reading in data from FRED API with vintage=2021-12-31
+.     noi di "$NOTE Reading in data from FRED API with vintage=$VINTAGE"
 .     clear
 .     import fred GNPCA, $DATERANGE vintage($VINTAGE)
-
-Summary
--------------------------------------------------------------------------------
-Series ID                    Nobs    Date range                Frequency
--------------------------------------------------------------------------------
-GNPCA_20211231               1       2007-01-01 to 2007-01-01  Annual
--------------------------------------------------------------------------------
-# of series imported: 1
-   highest frequency: Annual
-    lowest frequency: Annual
 .     save "data/fred/fred_gnpca.dta"
-file data/fred/fred_gnpca.dta saved
 .     use  "data/fred/fred_gnpca.dta" , clear
 . } 
 
