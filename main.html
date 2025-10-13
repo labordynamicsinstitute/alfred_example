@@ -385,18 +385,33 @@ NOTE &lt;- &quot;README ::::&quot;</code></pre>
 <div id="pulling-data-without-vintage-specification" class="section level2">
 <h2>Pulling Data WITHOUT Vintage Specification</h2>
 <p>By default, we pull data without specifying a vintage:</p>
+<pre class="r"><code>data_default &lt;- fredr(
+  series_id = &quot;GNPCA&quot;,
+  observation_start = DATE_START,
+  observation_end = DATE_END
+)
+print(data_default)</code></pre>
 <pre><code>## # A tibble: 1 × 5
 ##   date       series_id  value realtime_start realtime_end
 ##   &lt;date&gt;     &lt;chr&gt;      &lt;dbl&gt; &lt;date&gt;         &lt;date&gt;      
 ## 1 2007-01-01 GNPCA     16868. 2025-10-13     2025-10-13</code></pre>
+<pre class="r"><code>default_value &lt;- mean(data_default$value, na.rm = TRUE)</code></pre>
 </div>
 <div id="pulling-data-with-vintage-specification" class="section level2">
 <h2>Pulling Data WITH Vintage Specification</h2>
 <p>Now we do the same thing, but precisely defining the vintages:</p>
+<pre class="r"><code>data_vintaged &lt;- fredr(
+  series_id = &quot;GNPCA&quot;,
+  observation_start = DATE_START,
+  observation_end = DATE_END,
+  vintage_dates = VINTAGE
+)
+print(data_vintaged)</code></pre>
 <pre><code>## # A tibble: 1 × 5
 ##   date       series_id  value realtime_start realtime_end
 ##   &lt;date&gt;     &lt;chr&gt;      &lt;dbl&gt; &lt;date&gt;         &lt;date&gt;      
 ## 1 2007-01-01 GNPCA     15728. 2021-12-31     2021-12-31</code></pre>
+<pre class="r"><code>vintaged_value &lt;- mean(data_vintaged$value, na.rm = TRUE)</code></pre>
 </div>
 <div id="compare-the-results" class="section level2">
 <h2>Compare the Results</h2>
@@ -416,6 +431,28 @@ values may differ because:</p>
 <h2>Pulling Multiple Vintages for Comparison</h2>
 <p>Now let’s see why this matters - let’s pull down a few more
 vintages:</p>
+<pre class="r"><code># Combine all vintage dates
+all_vintages &lt;- c(VINTAGE, ALTVINTAGES)
+
+# Pull data for each vintage
+vintage_data_list &lt;- lapply(all_vintages, function(vintage) {
+  data &lt;- fredr(
+    series_id = &quot;GNPCA&quot;,
+    observation_start = DATE_START,
+    observation_end = DATE_END,
+    vintage_dates = vintage
+  )
+  data$vintage &lt;- as.character(vintage)
+  return(data)
+})
+
+# Combine all vintage data
+vintage_comparison &lt;- do.call(rbind, vintage_data_list)
+
+# Reshape for comparison
+vintage_wide &lt;- vintage_comparison %&gt;%
+  select(date, value, vintage) %&gt;%
+  tidyr::pivot_wider(names_from = vintage, values_from = value, names_prefix = &quot;vintage_&quot;)</code></pre>
 </div>
 <div id="comparison-of-gnpca-values-across-different-vintages" class="section level2">
 <h2>Comparison of GNPCA values across different vintages”</h2>
@@ -446,10 +483,33 @@ the API as an intermediate dataset and if permissible by the license
 work in the future.</p>
 <div id="data-persistence-strategy-1" class="section level3">
 <h3>Data Persistence Strategy</h3>
+<pre class="r"><code># Create directories if they don&#39;t exist
+dir.create(&quot;data&quot;, showWarnings = FALSE)
+dir.create(&quot;data/fred&quot;, showWarnings = FALSE)
+
+# Check if file exists
+if (file.exists(&quot;data/fred/fred_gnpca.rds&quot;)) {
+  cat(NOTE, &quot;Re-using existing file\n&quot;)
+  fred_data &lt;- readRDS(&quot;data/fred/fred_gnpca.rds&quot;)
+} else {
+  # Code if the file does not exist
+  # You could do the full API pull
+  # conditional on the intermediate
+  # file NOT being there
+  cat(NOTE, &quot;Reading in data from FRED API with vintage =&quot;, as.character(VINTAGE), &quot;\n&quot;)
+  fred_data &lt;- fredr(
+    series_id = &quot;GNPCA&quot;,
+    observation_start = DATE_START,
+    observation_end = DATE_END,
+    vintage_dates = VINTAGE
+  )
+  saveRDS(fred_data, &quot;data/fred/fred_gnpca.rds&quot;)
+}</code></pre>
 <pre><code>## README :::: Re-using existing file</code></pre>
 </div>
 <div id="final-dataset" class="section level3">
 <h3>Final Dataset</h3>
+<pre class="r"><code>print(fred_data)</code></pre>
 <pre><code>## # A tibble: 1 × 5
 ##   date       series_id  value realtime_start realtime_end
 ##   &lt;date&gt;     &lt;chr&gt;      &lt;dbl&gt; &lt;date&gt;         &lt;date&gt;      
