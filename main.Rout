@@ -1,0 +1,441 @@
+
+R version 4.4.3 (2025-02-28) -- "Trophy Case"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # FRED API Data Vintage Example in R
+> # Demonstrates the importance of using vintage dates when pulling API data
+> 
+> # Load required libraries
+> if (!require("fredr")) install.packages("fredr")
+Loading required package: fredr
+Installing package into ‘/usr/local/lib/R/site-library’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘sys’, ‘askpass’, ‘cli’, ‘glue’, ‘utf8’, ‘curl’, ‘mime’, ‘openssl’, ‘R6’, ‘fansi’, ‘lifecycle’, ‘magrittr’, ‘pillar’, ‘pkgconfig’, ‘vctrs’, ‘httr’, ‘jsonlite’, ‘rlang’, ‘tibble’
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/sys_3.4.3.tar.gz'
+Content type 'binary/octet-stream' length 40768 bytes (39 KB)
+==================================================
+downloaded 39 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/askpass_1.2.1.tar.gz'
+Content type 'binary/octet-stream' length 21896 bytes (21 KB)
+==================================================
+downloaded 21 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/cli_3.6.4.tar.gz'
+Content type 'binary/octet-stream' length 1328636 bytes (1.3 MB)
+==================================================
+downloaded 1.3 MB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/glue_1.8.0.tar.gz'
+Content type 'binary/octet-stream' length 168121 bytes (164 KB)
+==================================================
+downloaded 164 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/utf8_1.2.4.tar.gz'
+Content type 'binary/octet-stream' length 148180 bytes (144 KB)
+==================================================
+downloaded 144 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/curl_6.2.2.tar.gz'
+Content type 'binary/octet-stream' length 782792 bytes (764 KB)
+==================================================
+downloaded 764 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/mime_0.13.tar.gz'
+Content type 'binary/octet-stream' length 44504 bytes (43 KB)
+==================================================
+downloaded 43 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/openssl_2.3.2.tar.gz'
+Content type 'binary/octet-stream' length 1310209 bytes (1.2 MB)
+==================================================
+downloaded 1.2 MB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/R6_2.6.1.tar.gz'
+Content type 'binary/octet-stream' length 86805 bytes (84 KB)
+==================================================
+downloaded 84 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/fansi_1.0.6.tar.gz'
+Content type 'binary/octet-stream' length 317407 bytes (309 KB)
+==================================================
+downloaded 309 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/lifecycle_1.0.4.tar.gz'
+Content type 'binary/octet-stream' length 125006 bytes (122 KB)
+==================================================
+downloaded 122 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/magrittr_2.0.3.tar.gz'
+Content type 'binary/octet-stream' length 223604 bytes (218 KB)
+==================================================
+downloaded 218 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/pillar_1.10.2.tar.gz'
+Content type 'binary/octet-stream' length 658706 bytes (643 KB)
+==================================================
+downloaded 643 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/pkgconfig_2.0.3.tar.gz'
+Content type 'binary/octet-stream' length 18089 bytes (17 KB)
+==================================================
+downloaded 17 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/vctrs_0.6.5.tar.gz'
+Content type 'binary/octet-stream' length 1313013 bytes (1.3 MB)
+==================================================
+downloaded 1.3 MB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/httr_1.4.7.tar.gz'
+Content type 'binary/octet-stream' length 484006 bytes (472 KB)
+==================================================
+downloaded 472 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/jsonlite_2.0.0.tar.gz'
+Content type 'binary/octet-stream' length 1091001 bytes (1.0 MB)
+==================================================
+downloaded 1.0 MB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/rlang_1.1.5.tar.gz'
+Content type 'binary/octet-stream' length 1595150 bytes (1.5 MB)
+==================================================
+downloaded 1.5 MB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/tibble_3.2.1.tar.gz'
+Content type 'binary/octet-stream' length 678504 bytes (662 KB)
+==================================================
+downloaded 662 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/fredr_2.1.0.tar.gz'
+Content type 'binary/octet-stream' length 375965 bytes (367 KB)
+==================================================
+downloaded 367 KB
+
+* installing *binary* package ‘sys’ ...
+* DONE (sys)
+* installing *binary* package ‘cli’ ...
+* DONE (cli)
+* installing *binary* package ‘glue’ ...
+* DONE (glue)
+* installing *binary* package ‘utf8’ ...
+* DONE (utf8)
+* installing *binary* package ‘curl’ ...
+* DONE (curl)
+* installing *binary* package ‘mime’ ...
+* DONE (mime)
+* installing *binary* package ‘R6’ ...
+* DONE (R6)
+* installing *binary* package ‘fansi’ ...
+* DONE (fansi)
+* installing *binary* package ‘magrittr’ ...
+* DONE (magrittr)
+* installing *binary* package ‘pkgconfig’ ...
+* DONE (pkgconfig)
+* installing *binary* package ‘jsonlite’ ...
+* DONE (jsonlite)
+* installing *binary* package ‘rlang’ ...
+* DONE (rlang)
+* installing *binary* package ‘askpass’ ...
+* DONE (askpass)
+* installing *binary* package ‘lifecycle’ ...
+* DONE (lifecycle)
+* installing *binary* package ‘openssl’ ...
+* DONE (openssl)
+* installing *binary* package ‘vctrs’ ...
+* DONE (vctrs)
+* installing *binary* package ‘pillar’ ...
+* DONE (pillar)
+* installing *binary* package ‘httr’ ...
+* DONE (httr)
+* installing *binary* package ‘tibble’ ...
+* DONE (tibble)
+* installing *binary* package ‘fredr’ ...
+* DONE (fredr)
+
+The downloaded source packages are in
+	‘/tmp/RtmplhsdMV/downloaded_packages’
+Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘fredr’
+> if (!require("dplyr")) install.packages("dplyr")
+Loading required package: dplyr
+Installing package into ‘/usr/local/lib/R/site-library’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘withr’, ‘generics’, ‘tidyselect’
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/withr_3.0.2.tar.gz'
+Content type 'binary/octet-stream' length 223887 bytes (218 KB)
+==================================================
+downloaded 218 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/generics_0.1.3.tar.gz'
+Content type 'binary/octet-stream' length 81013 bytes (79 KB)
+==================================================
+downloaded 79 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/tidyselect_1.2.1.tar.gz'
+Content type 'binary/octet-stream' length 225331 bytes (220 KB)
+==================================================
+downloaded 220 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/dplyr_1.1.4.tar.gz'
+Content type 'binary/octet-stream' length 1491332 bytes (1.4 MB)
+==================================================
+downloaded 1.4 MB
+
+* installing *binary* package ‘withr’ ...
+* DONE (withr)
+* installing *binary* package ‘generics’ ...
+* DONE (generics)
+* installing *binary* package ‘tidyselect’ ...
+* DONE (tidyselect)
+* installing *binary* package ‘dplyr’ ...
+* DONE (dplyr)
+
+The downloaded source packages are in
+	‘/tmp/RtmplhsdMV/downloaded_packages’
+Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘dplyr’
+> if (!require("tidyr")) install.packages("tidyr")
+Loading required package: tidyr
+Installing package into ‘/usr/local/lib/R/site-library’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘stringi’, ‘purrr’, ‘stringr’, ‘cpp11’
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/stringi_1.8.7.tar.gz'
+Content type 'binary/octet-stream' length 3294694 bytes (3.1 MB)
+==================================================
+downloaded 3.1 MB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/purrr_1.0.4.tar.gz'
+Content type 'binary/octet-stream' length 536982 bytes (524 KB)
+==================================================
+downloaded 524 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/stringr_1.5.1.tar.gz'
+Content type 'binary/octet-stream' length 311167 bytes (303 KB)
+==================================================
+downloaded 303 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/cpp11_0.5.2.tar.gz'
+Content type 'binary/octet-stream' length 289415 bytes (282 KB)
+==================================================
+downloaded 282 KB
+
+trying URL 'https://p3m.dev/cran/__linux__/noble/2025-04-10/src/contrib/tidyr_1.3.1.tar.gz'
+Content type 'binary/octet-stream' length 1177490 bytes (1.1 MB)
+==================================================
+downloaded 1.1 MB
+
+* installing *binary* package ‘stringi’ ...
+* DONE (stringi)
+* installing *binary* package ‘purrr’ ...
+* DONE (purrr)
+* installing *binary* package ‘cpp11’ ...
+* DONE (cpp11)
+* installing *binary* package ‘stringr’ ...
+* DONE (stringr)
+* installing *binary* package ‘tidyr’ ...
+* DONE (tidyr)
+
+The downloaded source packages are in
+	‘/tmp/RtmplhsdMV/downloaded_packages’
+Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘tidyr’
+> library(fredr)
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> 
+> 
+> # Set some parameters we want to re-use
+> # - the date range we want
+> DATE_START <- as.Date("2007-01-01")
+> DATE_END <- as.Date("2007-01-01")
+> # - the as-of date we want
+> CURRENT_DATE <- Sys.Date()
+> VINTAGE <- as.Date("2021-12-31")
+> # - for testing, other as-of dates
+> ALTVINTAGES <- as.Date(c("2008-09-15", "2015-09-15"))
+> NOTE <- "README ::::"
+> 
+> # Now go ahead and import the data, by default (lazy path)
+> cat("\n=== Pulling data WITHOUT vintage specification ===\n")
+
+=== Pulling data WITHOUT vintage specification ===
+> data_default <- fredr(
++   series_id = "GNPCA",
++   observation_start = DATE_START,
++   observation_end = DATE_END
++ )
+> print(data_default)
+# A tibble: 1 × 5
+  date       series_id  value realtime_start realtime_end
+  <date>     <chr>      <dbl> <date>         <date>      
+1 2007-01-01 GNPCA     16868. 2025-10-13     2025-10-13  
+> default_value <- mean(data_default$value, na.rm = TRUE)
+> 
+> # Now do the same thing, but precisely defining the vintages
+> cat("\n=== Pulling data WITH vintage specification ===\n")
+
+=== Pulling data WITH vintage specification ===
+> data_vintaged <- fredr(
++   series_id = "GNPCA",
++   observation_start = DATE_START,
++   observation_end = DATE_END,
++   vintage_dates = VINTAGE
++ )
+> print(data_vintaged)
+# A tibble: 1 × 5
+  date       series_id  value realtime_start realtime_end
+  <date>     <chr>      <dbl> <date>         <date>      
+1 2007-01-01 GNPCA     15728. 2021-12-31     2021-12-31  
+> vintaged_value <- mean(data_vintaged$value, na.rm = TRUE)
+> 
+> cat(sprintf("\nAs of %s, the two values are:\n", CURRENT_DATE))
+
+As of 2025-10-13, the two values are:
+> cat(sprintf(" - %.2f when not specifying a vintage\n", default_value))
+ - 16867.78 when not specifying a vintage
+> cat(sprintf(" - %.2f when specifying vintage %s\n", vintaged_value, VINTAGE))
+ - 15727.50 when specifying vintage 2021-12-31
+> 
+> # Expected result:
+> # As of [current date], the two values may differ because:
+> # - The default pulls the most recent revision
+> # - The vintaged data pulls the value as it was known on 2021-12-31
+> 
+> # Now let's see why this matters - let's pull down a few more vintages
+> cat("\n=== Pulling multiple vintages for comparison ===\n")
+
+=== Pulling multiple vintages for comparison ===
+> 
+> # Combine all vintage dates
+> all_vintages <- c(VINTAGE, ALTVINTAGES)
+> 
+> # Pull data for each vintage
+> vintage_data_list <- lapply(all_vintages, function(vintage) {
++   data <- fredr(
++     series_id = "GNPCA",
++     observation_start = DATE_START,
++     observation_end = DATE_END,
++     vintage_dates = vintage
++   )
++   data$vintage <- as.character(vintage)
++   return(data)
++ })
+> 
+> # Combine all vintage data
+> vintage_comparison <- do.call(rbind, vintage_data_list)
+> 
+> # Reshape for comparison
+> vintage_wide <- vintage_comparison %>%
++   select(date, value, vintage) %>%
++   tidyr::pivot_wider(names_from = vintage, values_from = value, names_prefix = "vintage_")
+> 
+> cat("\nComparison of GNPCA values across different vintages:\n")
+
+Comparison of GNPCA values across different vintages:
+> print(vintage_wide)
+# A tibble: 1 × 4
+  date       `vintage_2021-12-31` `vintage_2008-09-15` `vintage_2015-09-15`
+  <date>                    <dbl>                <dbl>                <dbl>
+1 2007-01-01               15728.               11610.               15006.
+> 
+> cat("\nNOTE: These values should NEVER change once recorded.\n")
+
+NOTE: These values should NEVER change once recorded.
+> cat("The value for 2007-01-01 as of 2008-09-15 will always be what it was on that date.\n")
+The value for 2007-01-01 as of 2008-09-15 will always be what it was on that date.
+> 
+> # LESSON:
+> cat("\n=== KEY LESSONS ===\n")
+
+=== KEY LESSONS ===
+> cat("1. Always use a fixed vintage date to query the API for reproducibility\n")
+1. Always use a fixed vintage date to query the API for reproducibility
+> cat("2. Some series change as time progresses, even for historical values\n")
+2. Some series change as time progresses, even for historical values
+> cat("3. Without vintage specification, you get the latest revision\n")
+3. Without vintage specification, you get the latest revision
+> 
+> # SUPPLEMENTARY LESSON
+> # Save the data pulled through the API as an intermediate dataset
+> # and if permissible by the license (check!), redistribute it
+> # in case that the API is deprecated and won't work in the future
+> 
+> cat("\n=== Data Persistence Strategy ===\n")
+
+=== Data Persistence Strategy ===
+> 
+> # Create directories if they don't exist
+> dir.create("data", showWarnings = FALSE)
+> dir.create("data/fred", showWarnings = FALSE)
+> 
+> # Check if file exists
+> if (file.exists("data/fred/fred_gnpca.rds")) {
++   cat(NOTE, "Re-using existing file\n")
++   fred_data <- readRDS("data/fred/fred_gnpca.rds")
++ } else {
++   # Code if the file does not exist
++   # You could do the full API pull
++   # conditional on the intermediate
++   # file NOT being there
++   cat(NOTE, "Reading in data from FRED API with vintage =", as.character(VINTAGE), "\n")
++   fred_data <- fredr(
++     series_id = "GNPCA",
++     observation_start = DATE_START,
++     observation_end = DATE_END,
++     vintage_dates = VINTAGE
++   )
++   saveRDS(fred_data, "data/fred/fred_gnpca.rds")
++ }
+README :::: Re-using existing file
+> 
+> cat("\n=== Final Dataset ===\n")
+
+=== Final Dataset ===
+> print(fred_data)
+# A tibble: 1 × 5
+  date       series_id  value realtime_start realtime_end
+  <date>     <chr>      <dbl> <date>         <date>      
+1 2007-01-01 GNPCA     15728. 2021-12-31     2021-12-31  
+> 
+> cat("\n=== Analysis Complete ===\n")
+
+=== Analysis Complete ===
+> cat("Intermediate data saved to: data/fred/fred_gnpca.rds\n")
+Intermediate data saved to: data/fred/fred_gnpca.rds
+> cat("This ensures reproducibility even if the API changes or becomes unavailable.\n")
+This ensures reproducibility even if the API changes or becomes unavailable.
+> 
+> proc.time()
+   user  system elapsed 
+ 24.727  20.863  53.085 
