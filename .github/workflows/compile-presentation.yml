@@ -28,7 +28,7 @@ jobs:
 
     - name: Render Project
       run: |
-        ./render.sh
+        ./run.sh
 
     - name: Upload Artifact
       uses: actions/upload-pages-artifact@v3.0.1    
