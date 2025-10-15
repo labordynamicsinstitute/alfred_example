@@ -25,7 +25,7 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: rocker/tidyverse:4.4.3
-        options: -v ${{ github.workspace }}:/workspace -w /workspace
+        options: -e FRED_API_KEY=${{ secrets.FRED_API_KEY }} -v ${{ github.workspace }}:/workspace -w /workspace
         run: |
           ./run.sh
 
