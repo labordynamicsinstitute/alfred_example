@@ -65,6 +65,13 @@ library(fredr)
 library(dplyr)
 library(knitr)
 
+# if no .Renviron is present, try and read FRED_API_KEY from Sys.getenv
+if (Sys.getenv("FRED_API_KEY") == "") {
+  stop("FRED_API_KEY environment variable not set. See https://fred.stlouisfed.org/docs/api/api_key.html")
+} else {
+  fredr_set_key(Sys.getenv("FRED_API_KEY"))
+}
+
 DEFAULT_DATE=as.Date("2016-01-01")
 PLOT_DATE=as.Date("2012-01-01")
 ```

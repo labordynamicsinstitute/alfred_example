@@ -409,6 +409,13 @@ library(fredr)
 library(dplyr)
 library(knitr)
 
+# if no .Renviron is present, try and read FRED_API_KEY from Sys.getenv
+if (Sys.getenv(&quot;FRED_API_KEY&quot;) == &quot;&quot;) {
+  stop(&quot;FRED_API_KEY environment variable not set. See https://fred.stlouisfed.org/docs/api/api_key.html&quot;)
+} else {
+  fredr_set_key(Sys.getenv(&quot;FRED_API_KEY&quot;))
+}
+
 DEFAULT_DATE=as.Date(&quot;2016-01-01&quot;)
 PLOT_DATE=as.Date(&quot;2012-01-01&quot;)</code></pre>
 </div>
@@ -428,12 +435,12 @@ names(data_current)</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   date       series_id value realtime_start realtime_end
 ##   &lt;date&gt;     &lt;chr&gt;     &lt;dbl&gt; &lt;date&gt;         &lt;date&gt;      
-## 1 1929-01-01 GNPCA     1203. 2025-09-25     2025-09-25  
-## 2 1930-01-01 GNPCA     1101. 2025-09-25     2025-09-25  
-## 3 1931-01-01 GNPCA     1029. 2025-09-25     2025-09-25  
-## 4 1932-01-01 GNPCA      896. 2025-09-25     2025-09-25  
-## 5 1933-01-01 GNPCA      884. 2025-09-25     2025-09-25  
-## 6 1934-01-01 GNPCA      978. 2025-09-25     2025-09-25</code></pre>
+## 1 1929-01-01 GNPCA     1203. 2025-09-29     2025-09-29  
+## 2 1930-01-01 GNPCA     1101. 2025-09-29     2025-09-29  
+## 3 1931-01-01 GNPCA     1029. 2025-09-29     2025-09-29  
+## 4 1932-01-01 GNPCA      896. 2025-09-29     2025-09-29  
+## 5 1933-01-01 GNPCA      884. 2025-09-29     2025-09-29  
+## 6 1934-01-01 GNPCA      978. 2025-09-29     2025-09-29</code></pre>
 <pre class="r"><code>current_value &lt;- round(data_current$value[data_current$date == DEFAULT_DATE],0)
 max_current_date &lt;- max(data_current$date)
 min_date &lt;- min(data_current$date)
@@ -685,6 +692,7 @@ if (file.exists(&quot;data/fred/fred_gnpca.rds&quot;)) {
 <div id="impressum" class="section level1">
 <h1>Impressum</h1>
 <ul>
+<li>This document can be found at <a href="https://NA.github.io/NA" class="uri">https://NA.github.io/NA</a></li>
 <li>This document’s source: &lt;&gt;</li>
 <li>Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/"><img role="img" aria-label="CC BY-NC 4.0" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAPCAMAAABEF7i9AAAABGdBTUEAANbY1E9YMgAAAJZQTFRFAAAARERE7u7ud3d3lJmTDg4OERERZmZmMzMzDQ4NW15bDQ0NfYJ9cnZx3d3dMTMxhoaGJygnZ2tnOz07ISEhOTs5QUJBGRkZQkJCJCUjICAgDQ0MxsrGs7iyh4eHLjAuQ0NDxcbFj5CPS0xLyMzIgICADxAPur+6ys7KmZmZqqqqu7u7VVVVIiIiiIiIzMzMq7Gq////+Wgu+gAAAMlJREFUeNqtlNcOgzAMRZ0E6N57712C7///XItkIt6gJUd5SWQd3TiD/AOvpEJOGZKVJRUGzPcr/YUTBqFFhhow3y4VhaMxHAk1mc+nasKGRRKT0oriBKrHfD9Kf6UoV08EFAnb9EL8hjGRfjxhGsy3A32BjEyAbIYCYYcSTRZ41wHAhMybtSR0ZSITfbmEqhZp84BpuYT5Dcu8VEJuWTwjqmlF9S72O9dDl/DHHvJk6fmUg9UWGfOFh3vIHeqLbzqr+lK84v+v+QBzPE1kQ/1QEQAAAABJRU5ErkJggg==" alt="CC BY-NC 4.0" /></a></li>
 </ul>

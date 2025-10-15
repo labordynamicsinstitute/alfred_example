@@ -57,6 +57,13 @@ library(fredr)
 library(dplyr)
 library(knitr)
 
+# if no .Renviron is present, try and read FRED_API_KEY from Sys.getenv
+if (Sys.getenv("FRED_API_KEY") == "") {
+  stop("FRED_API_KEY environment variable not set. See https://fred.stlouisfed.org/docs/api/api_key.html")
+} else {
+  fredr_set_key(Sys.getenv("FRED_API_KEY"))
+}
+
 DEFAULT_DATE=as.Date("2016-01-01")
 PLOT_DATE=as.Date("2012-01-01")
 ```
@@ -94,12 +101,12 @@ print(head(data_current))
 ## # A tibble: 6 × 5
 ##   date       series_id value realtime_start realtime_end
 ##   <date>     <chr>     <dbl> <date>         <date>      
-## 1 1929-01-01 GNPCA     1203. 2025-09-25     2025-09-25  
-## 2 1930-01-01 GNPCA     1101. 2025-09-25     2025-09-25  
-## 3 1931-01-01 GNPCA     1029. 2025-09-25     2025-09-25  
-## 4 1932-01-01 GNPCA      896. 2025-09-25     2025-09-25  
-## 5 1933-01-01 GNPCA      884. 2025-09-25     2025-09-25  
-## 6 1934-01-01 GNPCA      978. 2025-09-25     2025-09-25
+## 1 1929-01-01 GNPCA     1203. 2025-09-29     2025-09-29  
+## 2 1930-01-01 GNPCA     1101. 2025-09-29     2025-09-29  
+## 3 1931-01-01 GNPCA     1029. 2025-09-29     2025-09-29  
+## 4 1932-01-01 GNPCA      896. 2025-09-29     2025-09-29  
+## 5 1933-01-01 GNPCA      884. 2025-09-29     2025-09-29  
+## 6 1934-01-01 GNPCA      978. 2025-09-29     2025-09-29
 ```
 
 ``` r
@@ -357,7 +364,7 @@ README :::: Re-using existing file with vintage =2017-06-01
 
 # Impressum
 
-
+- This document can be found at <https://NA.github.io/NA>
 - This document's source: <>
 - Licensed under [![CC BY-NC 4.0](images/cc-by-nc-80x15.png)](https://creativecommons.org/licenses/by-nc/4.0/)
 
