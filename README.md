@@ -351,3 +351,13 @@ but subsequent runs will show the output
 ```
 README :::: Re-using existing file with vintage =2017-06-01
 ```
+
+
+
+
+# Impressum
+
+
+- This document's source: <>
+- Licensed under [![CC BY-NC 4.0](images/cc-by-nc-80x15.png)](https://creativecommons.org/licenses/by-nc/4.0/)
+

@@ -12,6 +12,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 NOTE <- "README ::::"
 options(scipen = 999)
+GITHUB_REPOSITORY <- Sys.getenv("GITHUB_REPOSITORY")
+GITHUB_REPOSITORY_PARTS <- strsplit(GITHUB_REPOSITORY, "/")[[1]]
+REPOSITORY_URL <- paste0("https://github.com/", GITHUB_REPOSITORY)
+WEBSITE_URL <- paste0("https://", GITHUB_REPOSITORY_PARTS[1], ".github.io/", GITHUB_REPOSITORY_PARTS[2])
+
 ```
 
 ## Introduction
@@ -250,3 +255,8 @@ but subsequent runs will show the output
 ```
 README :::: Re-using existing file with vintage =2017-06-01
 ```
+
+
+```{r, child=c('99-links.md')}
+```
+

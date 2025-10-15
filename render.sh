@@ -6,4 +6,4 @@ docker run --rm \
   -v "$(pwd):/work" \
   -w /work \
   rocker/tidyverse:4.4.3 \
-  Rscript -e "rmarkdown::render('README.Rmd')"
+  run.sh
