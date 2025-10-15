@@ -1,90 +1,161 @@
 ---
-title: "FRED API Data Vintage Example"
+title: "Short discussion of use of API for reproducibility"
 author: "Lars Vilhuber"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
+  
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+NOTE <- "README ::::"
+options(scipen = 999)
 ```
 
 ## Introduction
 
-This document demonstrates the importance of using vintage dates when pulling API data from FRED.
 
-## Load Required Libraries
+Application programming interfaces (APIs) are popular, and often a very convenient way to get just the data one needs.
+
+However, they pose reproducibility challenges:
+
+- the data might change, in ways unknown to the researcher
+- the API might change, breaking the researcher's code
+
+This brief tutorial will discuss some safeguards that can be done at relatively low cost by the researcher to improve reproducibility.
+
+## The setting
+
+We will use the St. Louis Fed's FRED data service, frequently used by economists. In this example, we will use a single time-series -- `GNPCA` -- Real Gross National Product -- but the example can be easily extended to a whole set of series. 
+
+Often, researchers will use the default landing page for a time-series, in this case, [https://fred.stlouisfed.org/series/GNPCA](https://fred.stlouisfed.org/series/GNPCA), and then download a CSV or Excel file.
+
+![GNPCA landing page](images/gnpca-fred.png)
+
+However, they could instead use the API that is offered. This tutorial uses R and the [`fredr`](https://cran.r-project.org/web/packages/fredr/vignettes/fredr.html) to describe the use of that API.[^other]
+
+[^other]: For a version using Stata, see [this other document](stata-fred.md). Other interfaces include MATLAB and of course Python. 
+
+## Using the API
+
+The FRED API, as most other APIs, requires an API key - a kind of password. One typical technique is to store the API key as an  environment variable, or (less securely) hard-coding it in the code (this makes the code not easily shareable). For this tutorial, obtain an API key from the [FRED profile page](https://fredaccount.stlouisfed.org/apikeys]) (a login is required), then store in the file `.Renviron` as
+
+```
+# This is an example, not a valid API key!
+FRED_API_KEY="78862231cc0bd7a7f3b84eb9e19d4b7e"
+```
+
+Save it, and restart R. The environment variable will now be available to the R package `fredr`. 
+
+To use the API, we load the necessary libraries. 
 
 ```{r load-libraries, message=FALSE, warning=FALSE}
 if (!require("fredr")) install.packages("fredr")
 if (!require("dplyr")) install.packages("dplyr")
+if (!require("knitr")) install.packages("knitr")
+if (!require("ggplot2")) install.packages("ggplot2")
 library(fredr)
 library(dplyr)
+library(knitr)
+
+DEFAULT_DATE=as.Date("2016-01-01")
+PLOT_DATE=as.Date("2012-01-01")
 ```
 
-## Set Parameters
+## Simple usage
 
-```{r parameters}
+We can obtain the entire series for `GNPCA` as follows, focussing on the value for `r :
+
+```{r pull-current}
+data_current <- fredr(
+  series_id = "GNPCA"
+)
+names(data_current)
+nrow(data_current)
+print(head(data_current))
+current_value <- round(data_current$value[data_current$date == DEFAULT_DATE],0)
+max_current_date <- max(data_current$date)
+min_date <- min(data_current$date)
+today <- Sys.Date()
+```
+
+So the value of GNPCA, as of `r today` when we ran this, install
+
+> GNPCA(`r DEFAULT_DATE`) = `r current_value`, as of `r today`
+
+## Two observations
+
+Two things are of note:
+
+
+### Clipping the time series
+
+We pulled the entire time series, even though we only were interested in a subset. While the start date (for GNPCA, `r min_date`) will never change, the length of the time series will change if we pull in the future, or if we had pulled in the past. This might affect the rest of the code. So a good practice is to define precise start and end dates. 
+
+
+```{r define-start-end}
 # Set some parameters we want to re-use
 # - the date range we want
-DATE_START <- as.Date("2007-01-01")
-DATE_END <- as.Date("2007-01-01")
-# - the as-of date we want
-CURRENT_DATE <- Sys.Date()
-VINTAGE <- as.Date("2021-12-31")
-# - for testing, other as-of dates
-ALTVINTAGES <- as.Date(c("2008-09-15", "2015-09-15"))
-NOTE <- "README ::::"
-```
+DATE_START <- as.Date("2000-01-01")
+DATE_END <- as.Date("2016-01-01")
 
-## Pulling Data WITHOUT Vintage Specification
-
-By default, we pull data without specifying a vintage:
-
-```{r pull-default}
-data_default <- fredr(
+data_clipped <- fredr(
   series_id = "GNPCA",
   observation_start = DATE_START,
   observation_end = DATE_END
 )
-print(data_default)
-default_value <- mean(data_default$value, na.rm = TRUE)
+nrow(data_clipped)
+print(head(data_clipped))
+clipped_value <- round(data_clipped$value[data_clipped$date == DEFAULT_DATE],0)
+max_clipped_date <- max(data_clipped$date)
 ```
 
-## Pulling Data WITH Vintage Specification
+Thus, if we are primarily interested in the time series between, say, `r DATE_START` and `r DATE_END`, whenever we pull the data in the future, the length of the time series will be the same: `nrow(data_clipped)` rows. Note that this should not change the value obtained for `r DEFAULT_DATE`: 
 
+> GNPCA(`r DEFAULT_DATE`) = `r clipped_value`, when clipped between `r DATE_START` and `r DATE_END`
 
-Now we do the same thing, but precisely defining the vintages:
+but it would affect other (naively computed) values such as the mean of the time-series, or a computed linear trend.
 
-```{r pull-vintaged}
-data_vintaged <- fredr(
+### Revisions
+The second issue is that the measures of GNP, both specific data points, as well as occassionally the entire time series, are revised by the Bureau of Economic Analysis. At the time of writing this in 2025, `GNPCA` was expressed in "Billions of Chained 2017 Dollars". Obviously, prior to 2017, it would have been expressed differently. This also leads to revisions of historical values.
+
+The FRED API (although not all other APIs), allows to extract data with an *as-if* date, which they call a vintage. Thus, suppose we had pulled the time series as of a specific date:
+
+```{r define-dates2}
+VINTAGE <- as.Date("2017-06-01")
+
+data_vintage <- fredr(
   series_id = "GNPCA",
   observation_start = DATE_START,
   observation_end = DATE_END,
   vintage_dates = VINTAGE
 )
-print(data_vintaged)
-vintaged_value <- mean(data_vintaged$value, na.rm = TRUE)
+nrow(data_vintage)
+print(head(data_vintage))
+vintaged_value <- round(data_vintage$value[data_vintage$date == DEFAULT_DATE],0)
 ```
 
-## Compare the Results
+So what does the value for `GNPCA` look like as of `r VINTAGE`?
 
-As of `r CURRENT_DATE`, the two values are:
 
-- `r default_value`,  when not specifying a vintage
+As of `r today`, the two values for GNPCA that we have obtained are:
+
+- `r current_value`,  when not specifying a vintage, as of `r today`
 - `r vintaged_value`,  when specifying vintage `r VINTAGE`
 
-**Expected result:** As of the current date, the two values may differ because:
 
-- The default pulls the most recent revision
-- The vintaged data pulls the value as it was known on 2021-12-31
+That is a substantial difference in absolute value! In part, this is due to the rebase-lining of the time series, in part this is due to revisions of the annual value as additional data becomes available.
 
 ## Pulling Multiple Vintages for Comparison
 
 
-Now let's see why this matters - let's pull down a few more vintages:
+Now let's see how long this can matter, by obtaining a number of additional vintages.
 
 ```{r multiple-vintages}
+# - for testing, other as-of dates
+ALTVINTAGES <- as.Date(c("2018-01-01", "2019-01-01", "2020-01-01", "2021-01-01", "2022-01-01", "2023-01-01"))
 # Combine all vintage dates
 all_vintages <- c(VINTAGE, ALTVINTAGES)
 
@@ -106,33 +177,40 @@ vintage_comparison <- do.call(rbind, vintage_data_list)
 # Reshape for comparison
 vintage_wide <- vintage_comparison %>%
   select(date, value, vintage) %>%
-  tidyr::pivot_wider(names_from = vintage, values_from = value, names_prefix = "vintage_")
+  filter(date == DEFAULT_DATE) 
 ```
 
 
-## Comparison of GNPCA values across different vintages"
+## Comparison of GNPCA values across different vintages
 
-```{r print_vintages}
-print(vintage_wide)
+Focussing on the value for `r DEFAULT_DATE`, we see how the value has changed over time:
+
+```{r print_vintages,results='asis',echo=FALSE}
+kable(print(vintage_wide))
 ```
 
+The effect on the time series is shown in the following graph (focussing only on the period 2012-2016 for clarity):
 
-*NOTE: These values should NEVER change once recorded. The value for 2007-01-01 as of 2008-09-15 will always be what it was on that date.
-
-
-## Key Lessons
-
-**LESSON:**
-
-1. Always use a fixed vintage date to query the API for reproducibility
-2. Some series change as time progresses, even for historical values
-3. Without vintage specification, you get the latest revision
+```{r plot_vintages, fig.width=4, fig.height=4}
+library(ggplot2)
+vintage_comparison %>% 
+  filter(date > PLOT_DATE) %>%
+  ggplot(aes(x = date, y = value, color = vintage)) +
+  geom_line() +
+  labs(title = "GNPCA over time for different vintages",
+       x = "Date",
+       y = "GNPCA (Billions of Chained 2017 Dollars)",
+       color = "Vintage Date") +
+  theme_minimal()
+```
 
 ## Data Persistence Strategy
 
-**SUPPLEMENTARY LESSON:** Save the data pulled through the API as an intermediate dataset and if permissible by the license (check!), redistribute it in case that the API is deprecated and won't work in the future.
+APIs in general have one additional "feature": At some point, they may break, because the hosting institution makes decisions that affects its availability. While the above sections show how data can be obtained that precisely reflect the intended range and as-of date, they cannot compensate for the disappearance or breaking changes to an API. 
 
-### Data Persistence Strategy
+The solution is to save the data pulled through the API as an intermediate dataset ("cache") upon first use, and henceforth use the cached data. If redistribution is permissible by the license (check!), this also allows to provide future users with the same data, in case that the API is deprecated and won't work in the future.
+
+### Example implementation of caching
 
 ```{r data-persistence-code}
 # Create directories if they don't exist
@@ -141,14 +219,16 @@ dir.create("data/fred", showWarnings = FALSE)
 
 # Check if file exists
 if (file.exists("data/fred/fred_gnpca.rds")) {
-  cat(NOTE, "Re-using existing file\n")
   fred_data <- readRDS("data/fred/fred_gnpca.rds")
+  # get the vintage id from the file
+  VINTAGE_READ <- max(as.Date(fred_data$realtime_start))
+  message(NOTE, "Re-using existing file with vintage =", as.character(VINTAGE_READ),"\n")
 } else {
   # Code if the file does not exist
   # You could do the full API pull
   # conditional on the intermediate
   # file NOT being there
-  cat(NOTE, "Reading in data from FRED API with vintage =", as.character(VINTAGE), "\n")
+  message(NOTE, "Reading in data from FRED API with vintage =", as.character(VINTAGE), "\n")
   fred_data <- fredr(
     series_id = "GNPCA",
     observation_start = DATE_START,
@@ -159,18 +239,14 @@ if (file.exists("data/fred/fred_gnpca.rds")) {
 }
 ```
 
-### Final Dataset
+When first run, the code will output
 
-```{r data-persistence-print}
-print(fred_data)
+```
+README ::::Reading in data from FRED API with vintage =2017-06-01
 ```
 
-### Analysis Complete
+but subsequent runs will show the output
 
-Intermediate data saved to: `data/fred/fred_gnpca.rds`
-
-This ensures reproducibility even if the API changes or becomes unavailable.
-
-## Summary
-
-This analysis demonstrates the critical importance of specifying vintage dates when working with FRED API data to ensure reproducibility and understand how economic data revisions affect historical values.
+```
+README :::: Re-using existing file with vintage =2017-06-01
+```
