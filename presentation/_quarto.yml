@@ -1,0 +1,13 @@
+project:
+  type: default
+
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    incremental: true
+    code-overflow: wrap
+    embed-resources: true
+
+execute:
+  freeze: auto
