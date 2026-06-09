@@ -22,7 +22,7 @@ This example uses the St. Louis Fed's FRED service and the `GNPCA` time series.
 
 - Series page: <https://fred.stlouisfed.org/series/GNPCA>
 - The same pattern extends to larger collections of series.
-- The repository's Stata example is in `/tmp/workspace/labordynamicsinstitute/alfred_example/main.do`.
+- The repository's Stata example is in `main.do`.
 
 ## Typical workflow
 
